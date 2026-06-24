@@ -1,0 +1,274 @@
+{
+  "info": {
+    "name": "FitRAG Coach Backend",
+    "description": "FitRAG Coach local backend smoke-test collection.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "GET health",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/health"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('health ok', () => {",
+              "  pm.response.to.have.status(200);",
+              "  pm.expect(pm.response.json().data.status).to.eql('ok');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "POST signup",
+      "request": {
+        "method": "POST",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"fitrag{{$timestamp}}@example.com\",\n  \"password\": \"password1234\",\n  \"name\": \"FitRAG Tester\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{base_url}}/auth/signup"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('signup created token', () => pm.response.to.have.status(201));",
+              "const data = pm.response.json().data;",
+              "pm.environment.set('access_token', data.access_token);",
+              "pm.environment.set('user_id', data.user_id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PUT profile",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"gender\": \"male\",\n  \"age\": 30,\n  \"height_cm\": 175,\n  \"weight_kg\": 82,\n  \"muscle_mass_kg\": 34,\n  \"body_fat_percentage\": 24,\n  \"activity_level\": \"moderate\",\n  \"injuries\": \"무릎 통증 이력\",\n  \"allergies\": \"없음\",\n  \"dietary_restrictions\": \"없음\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{base_url}}/me/profile"
+      }
+    },
+    {
+      "name": "POST goal",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"goal_type\": \"fat_loss\",\n  \"target_weight_kg\": 74,\n  \"target_date\": \"2026-09-30\",\n  \"weekly_workout_days\": 3,\n  \"daily_workout_minutes\": 60,\n  \"experience_level\": \"beginner\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{base_url}}/goals"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('goal created', () => pm.response.to.have.status(201));",
+              "pm.environment.set('goal_id', pm.response.json().data.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "POST body analysis",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"goal_id\": \"{{goal_id}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{base_url}}/analysis/body"
+      }
+    },
+    {
+      "name": "POST workout recommendation",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"goal_id\": \"{{goal_id}}\",\n  \"week_start_date\": \"2026-06-29\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{base_url}}/recommendations/workout"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.environment.set('workout_plan_id', pm.response.json().data.workout_plan_id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "POST meal recommendation",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"goal_id\": \"{{goal_id}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{base_url}}/recommendations/meal"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.environment.set('meal_plan_id', pm.response.json().data.meal_plan_id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET shopping items",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/meal-plans/{{meal_plan_id}}/shopping-items"
+      }
+    },
+    {
+      "name": "POST rag document",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"source\": \"FitRAG Seed\",\n  \"title\": \"초보자 크로스핏 운동 강도 가이드\",\n  \"source_url\": \"https://example.com/fitrag-seed\",\n  \"text\": \"초보자는 주 2~3회 낮은 강도의 크로스핏 루틴으로 시작하고, 워밍업과 쿨다운을 포함해야 한다. 단백질은 체중 1kg당 1.6g 이상을 기준으로 삼되 개인 상태에 따라 조정한다.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{base_url}}/rag/documents"
+      }
+    },
+    {
+      "name": "POST rag search",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"초보자 크로스핏 운동 강도\",\n  \"top_k\": 5\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{base_url}}/rag/search"
+      }
+    }
+  ]
+}
