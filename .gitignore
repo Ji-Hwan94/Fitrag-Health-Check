@@ -24,9 +24,16 @@ Thumbs.db
 *.tsbuildinfo
 
 # secrets that should stay local
+.env
 .env.local
 .env.*.local
 *.pem
+
+# local Supabase CLI state
+supabase/.branches/
+supabase/.temp/
+fitrag_front/supabase/.branches/
+fitrag_front/supabase/.temp/
 
 # deployment
 .vercel/

@@ -1,0 +1,36 @@
+{
+  "version": "2026-06-25",
+  "description": "FR-007 RAG 근거 제공을 위한 FitRAG Coach MVP 원천 문서 목록",
+  "documents": [
+    {
+      "file": "exercise-intensity-and-weekly-planning.md",
+      "domain": "exercise",
+      "use_cases": ["workout_plan", "body_analysis", "safety"],
+      "tags": ["FR-004", "FR-007", "crossfit", "beginner", "intensity", "recovery"]
+    },
+    {
+      "file": "crossfit-session-structure-and-scaling.md",
+      "domain": "exercise",
+      "use_cases": ["workout_plan", "safety"],
+      "tags": ["FR-004", "FR-007", "warmup", "skill", "strength", "wod", "cooldown", "scaling"]
+    },
+    {
+      "file": "nutrition-targets-and-meal-planning.md",
+      "domain": "nutrition",
+      "use_cases": ["meal_plan", "shopping"],
+      "tags": ["FR-005", "FR-007", "calories", "protein", "carbs", "fat", "meal"]
+    },
+    {
+      "file": "diet-restrictions-allergies-and-substitutions.md",
+      "domain": "nutrition",
+      "use_cases": ["meal_plan", "shopping", "safety"],
+      "tags": ["FR-005", "FR-007", "allergy", "restriction", "substitution", "shopping"]
+    },
+    {
+      "file": "fitrag-answer-policy-and-safety.md",
+      "domain": "policy",
+      "use_cases": ["workout_plan", "meal_plan", "evidence", "safety"],
+      "tags": ["FR-003", "FR-004", "FR-005", "FR-007", "policy", "insufficient_context"]
+    }
+  ]
+}
