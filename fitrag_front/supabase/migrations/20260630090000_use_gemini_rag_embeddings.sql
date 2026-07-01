@@ -5,10 +5,10 @@ set embedding = null
 where embedding is not null;
 
 alter table public.rag_documents
-alter column embedding type vector(768);
+alter column embedding type extensions.vector(768);
 
 create index rag_documents_embedding_idx
   on public.rag_documents
-  using ivfflat (embedding vector_cosine_ops)
+  using ivfflat (embedding extensions.vector_cosine_ops)
   with (lists = 100)
   where embedding is not null;

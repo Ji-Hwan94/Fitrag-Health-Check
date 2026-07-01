@@ -147,7 +147,7 @@ create table public.rag_documents (
   title text not null,
   source_url text,
   chunk_text text not null,
-  embedding vector(768),
+  embedding extensions.vector(768),
   metadata jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now()
 );
@@ -208,7 +208,7 @@ create index recommendation_evidence_rag_document_id_idx
 
 create index rag_documents_embedding_idx
   on public.rag_documents
-  using ivfflat (embedding vector_cosine_ops)
+  using ivfflat (embedding extensions.vector_cosine_ops)
   with (lists = 100)
   where embedding is not null;
 
