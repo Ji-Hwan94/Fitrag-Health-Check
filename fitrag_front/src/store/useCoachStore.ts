@@ -1,6 +1,7 @@
 "use client";
 
 import { create } from "zustand";
+import type { FullRecommendationResponse } from "@/lib/api";
 
 export type GoalType =
   | "fat_loss"
@@ -10,30 +11,59 @@ export type GoalType =
   | "performance";
 
 export type ExperienceLevel = "beginner" | "intermediate" | "advanced";
+export type Gender = "male" | "female" | "none";
 
-type HealthProfile = {
-  gender: string;
+export type Account = {
+  email: string;
+  userId: string;
+  accessToken: string;
+  created: boolean;
+};
+
+export type HealthProfile = {
+  gender: Gender;
   age: number;
   heightCm: number;
   weightKg: number;
-  injuries: string;
-  dietaryRestrictions: string;
+  muscleMassKg: number | null;
+  fatMassKg: number | null;
+  bodyFatPercentage: number | null;
+  experienceLevel: ExperienceLevel;
+  injuries: string[];
+  allergies: string[];
+  dietaryRestrictions: string[];
+  foodPreferences: string;
+  medicalNotes: string;
 };
 
-type CoachGoal = {
+export type CoachGoal = {
   goalType: GoalType;
   targetWeightKg: number;
+  targetMuscleMassKg: number | null;
+  targetFatMassKg: number | null;
+  targetBodyFatPercentage: number | null;
+  targetDate: string;
   weeklyWorkoutDays: number;
   dailyWorkoutMinutes: number;
   experienceLevel: ExperienceLevel;
 };
 
 type CoachState = {
+  account: Account;
   profile: HealthProfile;
   goal: CoachGoal;
+  currentGoalId: string;
+  fullRecommendation: FullRecommendationResponse | null;
+  recommendationStatus: string;
   selectedPlanDay: string;
+  updateAccount: (account: Partial<Account>) => void;
   updateProfile: (profile: Partial<HealthProfile>) => void;
   updateGoal: (goal: Partial<CoachGoal>) => void;
+  setCurrentGoalId: (goalId: string) => void;
+  setFullRecommendation: (
+    recommendation: FullRecommendationResponse | null,
+  ) => void;
+  setRecommendationStatus: (status: string) => void;
   setSelectedPlanDay: (day: string) => void;
 };
 
@@ -51,25 +81,57 @@ export const experienceLabels: Record<ExperienceLevel, string> = {
   advanced: "고급",
 };
 
+export const genderLabels: Record<Gender, string> = {
+  male: "남성",
+  female: "여성",
+  none: "응답 안 함",
+};
+
 export const useCoachStore = create<CoachState>((set) => ({
+  account: {
+    email: "",
+    userId: "",
+    accessToken: "",
+    created: false,
+  },
   profile: {
-    gender: "male",
+    gender: "none",
     age: 30,
     heightCm: 175,
     weightKg: 82,
-    injuries: "무릎 통증 이력",
-    dietaryRestrictions: "없음",
+    muscleMassKg: null,
+    fatMassKg: null,
+    bodyFatPercentage: null,
+    experienceLevel: "beginner",
+    injuries: [],
+    allergies: [],
+    dietaryRestrictions: [],
+    foodPreferences: "",
+    medicalNotes: "",
   },
   goal: {
     goalType: "fat_loss",
     targetWeightKg: 74,
+    targetMuscleMassKg: null,
+    targetFatMassKg: null,
+    targetBodyFatPercentage: null,
+    targetDate: "2026-09-30",
     weeklyWorkoutDays: 3,
     dailyWorkoutMinutes: 60,
     experienceLevel: "beginner",
   },
+  currentGoalId: "",
+  fullRecommendation: null,
+  recommendationStatus: "",
   selectedPlanDay: "월",
+  updateAccount: (account) =>
+    set((state) => ({ account: { ...state.account, ...account } })),
   updateProfile: (profile) =>
     set((state) => ({ profile: { ...state.profile, ...profile } })),
   updateGoal: (goal) => set((state) => ({ goal: { ...state.goal, ...goal } })),
+  setCurrentGoalId: (goalId) => set({ currentGoalId: goalId }),
+  setFullRecommendation: (recommendation) =>
+    set({ fullRecommendation: recommendation }),
+  setRecommendationStatus: (status) => set({ recommendationStatus: status }),
   setSelectedPlanDay: (day) => set({ selectedPlanDay: day }),
 }));

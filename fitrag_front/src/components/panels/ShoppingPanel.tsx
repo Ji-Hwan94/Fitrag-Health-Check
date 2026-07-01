@@ -1,27 +1,46 @@
+"use client";
+
 import Panel from "@/components/ui/Panel";
+import {
+  buildNutritionTargets,
+  buildShoppingItems,
+} from "@/lib/recommendations";
+import { useCoachStore } from "@/store/useCoachStore";
 
-const shoppingItems = ["닭가슴살", "현미밥", "그릭요거트", "계란", "고구마"];
+const ShoppingPanel = () => {
+  const { fullRecommendation, goal, profile } = useCoachStore();
+  const nutrition = buildNutritionTargets(profile, goal);
+  const fallbackItems = buildShoppingItems(nutrition);
+  const shoppingItems =
+    fullRecommendation?.meal_plan.shopping_items.map((item) => ({
+      name: item.name,
+      quantity: item.quantity ?? "1주분",
+      keyword: item.search_keyword ?? `${item.name} 식단`,
+      url:
+        item.search_url ??
+        `https://www.coupang.com/np/search?q=${encodeURIComponent(item.name)}`,
+    })) ?? fallbackItems;
 
-function coupangSearchUrl(item: string) {
-  return `https://www.coupang.com/np/search?q=${encodeURIComponent(item)}`;
-}
-
-export default function ShoppingPanel() {
   return (
-    <Panel title="장보기">
-      <div className="flex flex-wrap gap-2">
+    <Panel title="장보기 검색">
+      <div className="grid gap-3">
         {shoppingItems.map((item) => (
           <a
-            key={item}
-            className="rounded-md border border-[#cbd4c4] bg-white px-3 py-2 text-sm font-medium text-[#344238] transition hover:border-[#52735d] hover:bg-[#eef3e9] focus:outline-none focus:ring-2 focus:ring-[#52735d]/25"
-            href={coupangSearchUrl(item)}
+            key={item.keyword}
+            className="rounded-md border border-[#c9d2c8] bg-white p-3 text-sm transition hover:border-[#3d6d5a] hover:bg-[#f7f8f3] focus:outline-none focus:ring-2 focus:ring-[#3d6d5a]/25"
+            href={item.url}
             rel="noreferrer"
             target="_blank"
           >
-            {item}
+            <span className="block font-semibold text-[#152018]">{item.name}</span>
+            <span className="mt-1 block text-[#526052]">
+              {item.quantity} · {item.keyword}
+            </span>
           </a>
         ))}
       </div>
     </Panel>
   );
-}
+};
+
+export default ShoppingPanel;

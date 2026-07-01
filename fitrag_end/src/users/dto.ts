@@ -1,25 +1,29 @@
-import { IsInt, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
+import {
+  IsIn,
+  IsInt,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+} from 'class-validator';
 
 export class UpsertProfileDto {
-  @IsOptional()
-  @IsString()
-  gender?: string;
+  @IsIn(['male', 'female'])
+  gender: string;
 
-  @IsOptional()
   @IsInt()
   @Min(1)
   @Max(120)
-  age?: number;
+  age: number;
 
-  @IsOptional()
   @IsNumber()
   @Min(1)
-  height_cm?: number;
+  height_cm: number;
 
-  @IsOptional()
   @IsNumber()
   @Min(1)
-  weight_kg?: number;
+  weight_kg: number;
 
   @IsOptional()
   @IsNumber()
@@ -37,9 +41,9 @@ export class UpsertProfileDto {
   @Max(100)
   body_fat_percentage?: number;
 
-  @IsOptional()
   @IsString()
-  activity_level?: string;
+  @IsIn(['beginner', 'intermediate', 'advanced'])
+  activity_level: string;
 
   @IsOptional()
   @IsString()
@@ -56,4 +60,8 @@ export class UpsertProfileDto {
   @IsOptional()
   @IsString()
   food_preferences?: string;
+
+  @IsOptional()
+  @IsString()
+  medical_notes?: string;
 }

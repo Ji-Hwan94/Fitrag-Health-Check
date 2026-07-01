@@ -20,6 +20,14 @@ export class RagSearchDto {
   query: string;
 
   @IsOptional()
+  @IsString()
+  domain?: string;
+
+  @IsOptional()
+  @IsString()
+  use_case?: string;
+
+  @IsOptional()
   @IsInt()
   @Min(1)
   @Max(20)

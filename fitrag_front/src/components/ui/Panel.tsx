@@ -1,4 +1,4 @@
-export default function Panel({
+const Panel = ({
   title,
   children,
   action,
@@ -6,7 +6,7 @@ export default function Panel({
   title: string;
   children: React.ReactNode;
   action?: React.ReactNode;
-}>) {
+}>) => {
   return (
     <section className="rounded-md border border-[#d9dfd1] bg-white p-5 shadow-sm">
       <div className="mb-4 flex items-center justify-between gap-4">
@@ -16,4 +16,6 @@ export default function Panel({
       {children}
     </section>
   );
-}
+};
+
+export default Panel;

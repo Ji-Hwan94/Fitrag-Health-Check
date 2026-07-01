@@ -31,17 +31,15 @@ export class UsersService {
   }
 
   async upsertProfile(userId: string, dto: UpsertProfileDto) {
-    const bmi =
-      dto.height_cm && dto.weight_kg
-        ? Number((dto.weight_kg / (dto.height_cm / 100) ** 2).toFixed(2))
-        : undefined;
+    const bodyEstimate = this.estimateBodyComposition(dto);
+    const bmi = Number((dto.weight_kg / (dto.height_cm / 100) ** 2).toFixed(2));
 
     const result = await this.db.query(
       `insert into public.health_profiles (
         user_id, gender, age, height_cm, weight_kg, muscle_mass_kg,
         fat_mass_kg, body_fat_percentage, bmi, activity_level, injuries,
-        allergies, dietary_restrictions, food_preferences
-      ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+        allergies, dietary_restrictions, food_preferences, medical_notes
+      ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
       on conflict (user_id) do update set
         gender = excluded.gender,
         age = excluded.age,
@@ -55,26 +53,55 @@ export class UsersService {
         injuries = excluded.injuries,
         allergies = excluded.allergies,
         dietary_restrictions = excluded.dietary_restrictions,
-        food_preferences = excluded.food_preferences
+        food_preferences = excluded.food_preferences,
+        medical_notes = excluded.medical_notes
       returning *`,
       [
         userId,
-        dto.gender ?? null,
-        dto.age ?? null,
-        dto.height_cm ?? null,
-        dto.weight_kg ?? null,
-        dto.muscle_mass_kg ?? null,
-        dto.fat_mass_kg ?? null,
-        dto.body_fat_percentage ?? null,
-        bmi ?? null,
-        dto.activity_level ?? null,
+        dto.gender,
+        dto.age,
+        dto.height_cm,
+        dto.weight_kg,
+        dto.muscle_mass_kg && dto.muscle_mass_kg > 0
+          ? dto.muscle_mass_kg
+          : bodyEstimate.muscleMassKg,
+        dto.fat_mass_kg && dto.fat_mass_kg > 0
+          ? dto.fat_mass_kg
+          : bodyEstimate.fatMassKg,
+        dto.body_fat_percentage && dto.body_fat_percentage > 0
+          ? dto.body_fat_percentage
+          : bodyEstimate.bodyFatPercentage,
+        bmi,
+        dto.activity_level,
         dto.injuries ?? null,
         dto.allergies ?? null,
         dto.dietary_restrictions ?? null,
         dto.food_preferences ?? null,
+        dto.medical_notes ?? null,
       ],
     );
 
     return result.rows[0];
+  }
+
+  private estimateBodyComposition(dto: UpsertProfileDto) {
+    const bmi = dto.weight_kg / (dto.height_cm / 100) ** 2;
+    const sexOffset = dto.gender === 'male' ? 10.8 : 0;
+    const minBodyFat = dto.gender === 'male' ? 8 : 18;
+    const maxBodyFat = dto.gender === 'male' ? 35 : 45;
+    const bodyFatPercentage = Number(
+      Math.max(
+        minBodyFat,
+        Math.min(maxBodyFat, 1.2 * bmi + 0.23 * dto.age - sexOffset - 5.4),
+      ).toFixed(1),
+    );
+    const fatMassKg = Number(
+      ((dto.weight_kg * bodyFatPercentage) / 100).toFixed(1),
+    );
+    const leanMassKg = dto.weight_kg - fatMassKg;
+    const muscleMassRatio = dto.gender === 'male' ? 0.55 : 0.5;
+    const muscleMassKg = Number((leanMassKg * muscleMassRatio).toFixed(1));
+
+    return { bodyFatPercentage, fatMassKg, muscleMassKg };
   }
 }

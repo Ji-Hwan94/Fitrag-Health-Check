@@ -1,4 +1,4 @@
-export default function NumberInput({
+const NumberInput = ({
   label,
   value,
   suffix,
@@ -12,7 +12,7 @@ export default function NumberInput({
   min?: number;
   max?: number;
   onChange: (value: number) => void;
-}>) {
+}>) => {
   return (
     <label className="grid gap-2 text-sm font-medium text-[#344238]">
       {label}
@@ -31,4 +31,6 @@ export default function NumberInput({
       </div>
     </label>
   );
-}
+};
+
+export default NumberInput;

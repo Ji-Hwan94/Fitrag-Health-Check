@@ -1,5 +1,9 @@
 import FitRagHome from "@/components/FitRagHome";
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+const Home = () => {
   return <FitRagHome />;
-}
+};
+
+export default Home;

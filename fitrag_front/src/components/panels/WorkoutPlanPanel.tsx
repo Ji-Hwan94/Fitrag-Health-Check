@@ -1,76 +1,122 @@
 "use client";
 
 import Panel from "@/components/ui/Panel";
+import { buildWorkoutPlan } from "@/lib/recommendations";
 import { useCoachStore } from "@/store/useCoachStore";
 
-const weekPlan = [
-  {
-    day: "월",
-    title: "기초 스쿼트 + 짧은 WOD",
-    intensity: "낮음-중간",
-    details: ["로잉 5분", "Goblet squat 3x10", "AMRAP 10분"],
-  },
-  {
-    day: "수",
-    title: "푸시/풀 기본기",
-    intensity: "낮음",
-    details: ["밴드 풀어파트", "푸시업 스케일", "Bike interval"],
-  },
-  {
-    day: "금",
-    title: "전신 컨디셔닝",
-    intensity: "중간",
-    details: ["데드리프트 자세", "EMOM 12분", "하체 스트레칭"],
-  },
-];
+const PlanBlock = ({
+  title,
+  items,
+}: Readonly<{ title: string; items: string[] }>) => (
+  <div className="rounded-md border border-[#d8ded7] bg-[#fbfcf8] p-4">
+    <p className="text-sm font-semibold text-[#344238]">{title}</p>
+    <ul className="mt-2 grid gap-2">
+      {items.map((item) => (
+        <li key={item} className="text-sm leading-6 text-[#526052]">
+          {item}
+        </li>
+      ))}
+    </ul>
+  </div>
+);
 
-export default function WorkoutPlanPanel() {
-  const { selectedPlanDay, setSelectedPlanDay } = useCoachStore();
+const WorkoutPlanPanel = () => {
+  const {
+    fullRecommendation,
+    goal,
+    profile,
+    selectedPlanDay,
+    setSelectedPlanDay,
+  } = useCoachStore();
+  const fallbackPlan = buildWorkoutPlan(profile, goal);
+  const weekPlan =
+    fullRecommendation?.workout_plan.days.map((plan) => ({
+      day: plan.day,
+      title: `${plan.day} 크로스핏 루틴`,
+      goalFocus: plan.goal_focus,
+      intensity: fullRecommendation.workout_plan.intensity_level,
+      minutes: plan.target_minutes ?? goal.dailyWorkoutMinutes,
+      warmup: plan.warmup,
+      skill: plan.skill,
+      strength: plan.strength,
+      wod: plan.wod,
+      cooldown: plan.cooldown,
+      alternatives: plan.alternatives,
+    })) ?? fallbackPlan;
   const selectedPlan =
     weekPlan.find((plan) => plan.day === selectedPlanDay) ?? weekPlan[0];
 
   return (
-    <Panel title="주간 운동 계획">
-      <div className="mb-4 flex gap-2">
+    <Panel title="주간 크로스핏 운동 계획">
+      <div className="mb-4 flex flex-wrap gap-2">
         {weekPlan.map((plan) => (
           <button
             key={plan.day}
             className={`h-10 rounded-md px-4 text-sm font-semibold transition ${
-              selectedPlanDay === plan.day
-                ? "bg-[#17201a] text-white"
-                : "border border-[#cbd4c4] bg-white text-[#344238] hover:border-[#52735d]"
+              selectedPlan.day === plan.day
+                ? "bg-[#152018] text-white"
+                : "border border-[#c9d2c8] bg-white text-[#344238] hover:border-[#3d6d5a]"
             }`}
-            onClick={() => setSelectedPlanDay(plan.day)}
             type="button"
+            onClick={() => setSelectedPlanDay(plan.day)}
           >
             {plan.day}
           </button>
         ))}
       </div>
-      <div className="grid gap-4 md:grid-cols-[1fr_220px]">
+      <div className="grid gap-4 lg:grid-cols-[1fr_280px]">
         <div>
           <h3 className="text-xl font-semibold">{selectedPlan.title}</h3>
-          <ul className="mt-4 grid gap-3">
-            {selectedPlan.details.map((detail) => (
-              <li
-                key={detail}
-                className="rounded-md bg-[#f7f8f3] px-4 py-3 text-sm text-[#405143]"
-              >
-                {detail}
-              </li>
-            ))}
-          </ul>
+          <p className="mt-2 text-sm text-[#526052]">
+            예상 소요 시간 {selectedPlan.minutes}분
+          </p>
+          {selectedPlan.goalFocus ? (
+            <p className="mt-2 rounded-md bg-[#e8f2eb] px-3 py-2 text-sm leading-6 text-[#405143]">
+              목표 반영: {selectedPlan.goalFocus}
+            </p>
+          ) : null}
+          <div className="mt-4 grid gap-3 md:grid-cols-2">
+            <PlanBlock title="워밍업" items={selectedPlan.warmup} />
+            <PlanBlock title="기술 연습" items={selectedPlan.skill} />
+            <PlanBlock title="근력 운동" items={selectedPlan.strength} />
+            <PlanBlock title="쿨다운" items={selectedPlan.cooldown} />
+          </div>
+          <div className="mt-3 rounded-md bg-[#e8f2eb] p-4">
+            <p className="text-sm font-semibold text-[#344238]">WOD</p>
+            <p className="mt-2 text-sm leading-6 text-[#405143]">
+              {selectedPlan.wod}
+            </p>
+          </div>
         </div>
-        <div className="rounded-md border border-[#d9dfd1] bg-white p-4">
+        <div className="rounded-md border border-[#d8ded7] bg-white p-4">
           <p className="text-sm text-[#6b766c]">운동 강도</p>
-          <p className="mt-1 text-2xl font-semibold">
-            {selectedPlan.intensity}
-          </p>
-          <p className="mt-4 text-sm leading-6 text-[#526052]">
-            무릎 통증이 있으면 점프 동작을 로잉 또는 바이크로 대체합니다.
-          </p>
+          <p className="mt-1 text-2xl font-semibold">{selectedPlan.intensity}</p>
+          <div className="mt-4">
+            <p className="text-sm font-semibold text-[#344238]">대체 운동</p>
+            <ul className="mt-2 grid gap-2">
+              {selectedPlan.alternatives.map((item) => (
+                <li key={item} className="text-sm leading-6 text-[#526052]">
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+          {fullRecommendation?.workout_plan.caution_notes.length ? (
+            <div className="mt-4">
+              <p className="text-sm font-semibold text-[#344238]">주의 사항</p>
+              <ul className="mt-2 grid gap-2">
+                {fullRecommendation.workout_plan.caution_notes.map((item) => (
+                  <li key={item} className="text-sm leading-6 text-[#526052]">
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
         </div>
       </div>
     </Panel>
   );
-}
+};
+
+export default WorkoutPlanPanel;
