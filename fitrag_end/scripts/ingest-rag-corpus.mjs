@@ -56,7 +56,7 @@ try {
     await pool.query(
       `insert into public.rag_documents (
         source, title, source_url, chunk_text, embedding, metadata
-      ) values ($1, $2, $3, $4, $5::vector, $6::jsonb)`,
+      ) values ($1, $2, $3, $4, $5::extensions.vector, $6::jsonb)`,
       [
         record.source,
         record.title,

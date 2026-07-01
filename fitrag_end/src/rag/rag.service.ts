@@ -49,7 +49,7 @@ export class RagService {
       const result = await this.db.query(
         `insert into public.rag_documents (
           source, title, source_url, chunk_text, embedding, metadata
-        ) values ($1,$2,$3,$4,$5::vector,$6)
+        ) values ($1,$2,$3,$4,$5::extensions.vector,$6)
         returning id, source, title, source_url, chunk_text, metadata`,
         [
           dto.source,
@@ -89,11 +89,11 @@ export class RagService {
     const filters = this.buildMetadataFilters(dto, 3);
     const result = await this.db.query<RagSearchResult>(
       `select id, source, title, source_url, chunk_text, metadata,
-        greatest(0, 1 - (embedding <=> $1::vector))::float as relevance_score
+        greatest(0, 1 - (embedding <=> $1::extensions.vector))::float as relevance_score
        from public.rag_documents
        where embedding is not null
        ${filters.sql}
-       order by embedding <=> $1::vector
+       order by embedding <=> $1::extensions.vector
        limit $2`,
       [this.toVectorLiteral(embedding), topK, ...filters.params],
     );
