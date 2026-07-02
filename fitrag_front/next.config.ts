@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  outputFileTracingRoot: __dirname,
+  outputFileTracingRoot: process.cwd(),
 };
 
 export default nextConfig;
